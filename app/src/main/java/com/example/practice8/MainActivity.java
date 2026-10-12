@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -59,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //слушатель выбора дополнительной функции
-        productList.setOnItemLongClickListener((parent, view, position, id) -> {
+        productList.setOnItemClickListener((parent, view, position, id) -> {
             showManageDialog(position);
-            return true;
         });
     }
 
+    //открытие всплывающего окна для управления
     private void showManageDialog(int position) {
         Product product = products.get(position);
 
@@ -75,58 +74,54 @@ public class MainActivity extends AppCompatActivity {
                         showEditDialog(position);
                     }
                     else {
-                        confirmDelete(position);
+                        confirmDeleteDialog(position);
                     }
                 })
                 .show();
     }
 
-    private void showEditDialog(int position) {
-        Product product = products.get(position);
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        layout.setPadding(pad, pad, pad, pad);
-
-        EditText nameInput = new EditText(this);
-        nameInput.setHint("Название");
-        nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        nameInput.setText(product.getName());
-        layout.addView(nameInput);
-
-        EditText unitInput = new EditText(this);
-        unitInput.setHint("Ед. измерения");
-        unitInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        unitInput.setText(product.getUnit());
-        layout.addView(unitInput);
-
-        new AlertDialog.Builder(this)
-                .setTitle("Редактирование")
-                .setView(layout)
-                .setPositiveButton("Сохранить", (d, w) -> {
-                    String newName = nameInput.getText().toString().trim();
-                    String newUnit = unitInput.getText().toString().trim();
-
-                    if (newName.isEmpty() || newUnit.isEmpty()) {
-                        Toast.makeText(this,"Поля не должны быть пустыми", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    product.setName(newName);
-                    product.setUnit(newUnit);
-                    adapter.notifyDataSetChanged();
-                })
-                .setNegativeButton("Отмена", null)
-                .show();
-    }
-
-    private void confirmDelete(int position) {
+    //открытие всплывающего окна для удаления
+    private void confirmDeleteDialog(int position) {
         Product product = products.get(position);
         new AlertDialog.Builder(this)
                 .setTitle("Удалить товар?")
                 .setMessage(product.getName())
                 .setPositiveButton("Удалить", (d, w) -> {
                     products.remove(position);
+                    adapter.notifyDataSetChanged();
+                })
+                .setNegativeButton("Отмена", null)
+                .show();
+    }
+
+    //открытие всплывающего окна для редактирования
+    private void showEditDialog(int position) {
+        Product product = products.get(position);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        layout.setPadding(pad, pad, pad, pad);
+        EditText nameInput = new EditText(this);
+        nameInput.setHint("Название");
+        nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        nameInput.setText(product.getName());
+        layout.addView(nameInput);
+        EditText unitInput = new EditText(this);
+        unitInput.setHint("Ед. измерения");
+        unitInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        unitInput.setText(product.getUnit());
+        layout.addView(unitInput);
+        new AlertDialog.Builder(this)
+                .setTitle("Редактирование")
+                .setView(layout)
+                .setPositiveButton("Сохранить", (d, w) -> {
+                    String newName = nameInput.getText().toString().trim();
+                    String newUnit = unitInput.getText().toString().trim();
+                    if (newName.isEmpty() || newUnit.isEmpty()) { Toast.makeText(this,"Поля не должны быть пустыми", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    product.setName(newName);
+                    product.setUnit(newUnit);
                     adapter.notifyDataSetChanged();
                 })
                 .setNegativeButton("Отмена", null)
